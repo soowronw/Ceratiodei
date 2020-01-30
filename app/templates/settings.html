@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+
+<table class="table">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">#ID</th>
+      <th scope="col">ROUTE</th>
+      <th scope="col">LINK</th>
+        <th scope="col"><button type="button" class="btn btn-primary"  data-toggle="modal" data-target="#Modal">ADD</button></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for link in links %}
+    <tr>
+      <td id="id{{link.id}}">{{link.id}}</td>
+      <td><input id="route{{link.id}}" type="text" value="{{link.route}}"></td>
+      <td><input id="link{{link.id}}" type="text" value="{{link.link}}" size="70"></td>
+      <td><button type="button" class="btn btn-dark"
+                  onclick="
+                  send_changes(
+                  document.getElementById('id{{link.id}}').textContent,
+                  document.getElementById('route{{link.id}}').value,
+                  document.getElementById('link{{link.id}}').value);
+                  setTimeout('window.location.reload(true)', 1000);
+                  " >CHANGE
+      </button>
+      <button type="button" class="btn btn-danger"
+              onclick="delete_row(document.getElementById('id{{link.id}}').textContent);setTimeout('window.location.reload(true)', 1000);" {{link.status}}>DELETE</button>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+
+<div class="modal fade" id="Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">ADD ROUTE-LINK</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <div class="input-group">
+              <div class="input-group-prepend">
+                  <span class="input-group-text" id="">ROUTE | LINK</span>
+              </div>
+              <input type="text" id="routeModal" class="form-control" placeholder="ROUTE">
+              <input type="text" id="linkModal"class="form-control" placeholder="LINK">
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="window.location.reload(true);">Close</button>
+        <button type="button" class="btn btn-primary"
+                onclick="
+                add_row(document.getElementById('routeModal').value,
+                document.getElementById('linkModal').value);">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    function send_changes(id,route,link){
+    $.post(
+    "{{adminrouteapi_change}}",
+    {
+        'id': id,
+       'route': route,
+        'link': link
+    },
+    onAjaxSuccess
+     );
+     function onAjaxSuccess(data){
+     alert(data);
+     }
+    }
+
+    function delete_row(id){
+    $.post(
+    "{{adminrouteapi_delete}}",
+    {
+        'id': id
+    },
+    onAjaxSuccess
+     );
+      function onAjaxSuccess(data){
+     alert(data);
+     }
+    }
+
+    function add_row(route,link){
+    $.post(
+    "{{adminrouteapi_add}}",
+    {
+        'route': route,
+        'link': link
+    },
+    onAjaxSuccess
+     );
+      function onAjaxSuccess(data){
+     alert(data);
+     }
+    }
+</script>
+{% endblock %}

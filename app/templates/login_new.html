@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+      <link href="{{ url_for('static', filename='bootstrap-4.4.1-dist/css/bootstrap.min.css') }}" rel="stylesheet">
+      <link href="{{ url_for('static', filename='signin.css') }}" rel="stylesheet">
+
+    <title>Ceratioidei</title>
+  </head>
+  <body class="text-center">
+
+   <form class="form-signin" action="" method="post">
+       {{ form.csrf_token }}
+      <img class="mb-4" src="{{ url_for('static', filename='logo.png') }}" alt="" width="95" height="72">
+      <h1 class="h3 mb-3 font-weight-normal">Ceratioidei </h1>
+     <!-- <label for="inputLogin" class="sr-only">Login</label>
+      <input type="text" id="inputLogin" class="form-control" placeholder="Login" required autofocus>-->
+       {{ form.username.label(for="inputLogin",class="sr-only") }}
+	    {{ form.username(type="text", id="inputLogin", class="form-control", placeholder="Login") }}
+	    {% if form.username.errors %}
+		{% for error in form.username.errors %}
+		    {{ error }}
+		{% endfor %}
+	    {% endif %}
+      <!--<label for="inputPassword" class="sr-only">Password</label>
+      <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>-->
+        {{ form.password.label(for="inputPassword", class="sr-only") }}
+	    {{ form.password(type="password", id="inputPassword", class="form-control", placeholder="Password") }}
+	    {% if form.password.errors %}
+		{% for error in form.password.errors %}
+		    {{ error }}
+		{% endfor %}
+	    {% endif %}
+      <!--<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>-->
+       {{ form.submit(class="btn btn-lg btn-primary btn-block", type="submit") }}
+    </form>
+
+
+  </body>
+</html>
