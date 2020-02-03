@@ -18,7 +18,7 @@ class Captured_data(db.Model):
     ip = db.Column(db.String(16))
     ua = db.Column(db.String(120))
     referrer = db.Column(db.String(200))
-    created = db.Column(db.DateTime(), default=datetime.utcnow())
+    created = db.Column(db.DateTime(), default=datetime.utcnow)
 
 
 class User(db.Model, UserMixin):
