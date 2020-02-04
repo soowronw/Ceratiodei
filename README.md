@@ -10,9 +10,11 @@ python run.py<br />
 Also you may run with WSGI servers like gunicorn <br />
 
 2)Change route to admin panel, admin login, admin password <br />
+Do this before start app or restart app.<br />
 python db_change_admin.py -apn YOUROUTE -al YOULOGIN -aps YOUPASSWORD<br />
 DEFAULT:<br />
 ADMIN Route: admincera <br />
 ADMIN Login : admin<br />
 ADMIN Password: admin<br />
+
 
