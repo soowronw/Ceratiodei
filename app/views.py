@@ -4,6 +4,7 @@ from app import appFlask, db
 from flask import redirect, request, render_template, url_for
 from app.models import Captured_data, Links, User
 from app.forms import LoginForm
+from app.p0fclient import P0f
 
 
 def catch_ip(request, url):
@@ -94,6 +95,40 @@ def index():
     url = '/'
     catch_ip(request, url)
     link = db.session.query(Links.link).filter(Links.route == '/').scalar()
+    try:
+        # sudo p0f -i eth0 -s /home/support/Repo/cera/p0f.sock
+        p0f_client = P0f("p0f.sock")
+        p0f_info = p0f_client.get_info(request.remote_addr)
+        print(p0f_info)
+        print(p0f_info['magic'])
+        print(p0f_info['status'])
+        print(p0f_info['first_seen'])
+        print(p0f_info['last_seen'])
+        print(p0f_info['total_conn'])
+        print(p0f_info['uptime_min'])
+        print(p0f_info['up_mod_days'])
+        print(p0f_info['last_nat'])
+        print(p0f_info['last_chg'])
+        print(p0f_info['distance'])
+        print(p0f_info['bad_sw'])
+        print(p0f_info['os_match_q'])
+        print(p0f_info['os_name'].decode("utf-8"))
+        print(p0f_info['os_flavor'].decode("utf-8"))
+        print(p0f_info['http_name'].decode("utf-8"))
+        print(p0f_info['http_flavor'].decode("utf-8"))
+        print('LINK TYPE',p0f_info['link_type'].decode("utf-8"))
+        print(p0f_info['language'].decode("utf-8"))
+        print(p0f_info['uptime'])
+        print(p0f_info['uptime_sec'])
+
+
+
+
+
+    except Exception as e:
+        print('Err p0f')
+        print(e)
+
     return redirect(link, code=302)
 
 
