@@ -2,25 +2,78 @@ from flask_login import login_required, logout_user
 from flask_login import current_user, login_user
 from app import appFlask, db
 from flask import redirect, request, render_template, url_for
-from app.models import Captured_data, Links, User
+from app.models import Captured_data, Links, User, P0ftbl
 from app.forms import LoginForm
 from app.p0fclient import P0f
 
 
 def catch_ip(request, url):
     user_ip = request.remote_addr
+    rawheaders = str(request.headers)
     user_agent = request.headers.get('User-Agent')
     referrer = request.headers.get("Referer")
     rule = url
-    row = Captured_data(url=str(rule), ip=str(user_ip), ua=str(user_agent), referrer=str(referrer))
+    row = Captured_data(url=str(rule), ip=str(user_ip), ua=str(user_agent),
+                        referrer=str(referrer), rawheaders=rawheaders)
     db.session.add(row)
     db.session.commit()
+    captured_data_id = row.id
+    print(row.id)
+    try:
+        p0f_client = P0f("p0f.sock")
+        p0f_info = p0f_client.get_info(request.remote_addr)
+        print('----------Beauty------------')
+        print('magic=', p0f_info['magic'])
+        print('status=', p0f_info['status'])
+        print('first_seen=', p0f_info['first_seen'])
+        print('last_seen=', p0f_info['last_seen'])
+        print('total_conn=', p0f_info['total_conn'])
+        print('uptime_min=', p0f_info['uptime_min'])
+        print('up_mod_days=', p0f_info['up_mod_days'])
+        print('last_nat=', p0f_info['last_nat'])
+        print('last_chg=', p0f_info['last_chg'])
+        print('distance=', p0f_info['distance'])
+        print('bad_sw', p0f_info['bad_sw'])
+        print('os_match_q=', p0f_info['os_match_q'])
+        print('os_name=', p0f_info['os_name'].decode("utf-8").rstrip('\x00'))
+        print('os_flavor=', p0f_info['os_flavor'].decode("utf-8").rstrip('\x00'))
+        print('http_name=', p0f_info['http_name'].decode("utf-8").rstrip('\x00'))
+        print('http_flavor=', p0f_info['http_flavor'].decode("utf-8").rstrip('\x00'))
+        print('link_type=', p0f_info['link_type'].decode("utf-8").rstrip('\x00'))
+        print('language=', p0f_info['language'].decode("utf-8").rstrip('\x00'))
+        print('uptime=', p0f_info['uptime'])
+        print('uptime_sec=', p0f_info['uptime_sec'])
+        row = P0ftbl(magic=p0f_info['magic'],
+                     status=p0f_info['status'],
+                     first_seen=p0f_info['first_seen'],
+                     last_seen=p0f_info['last_seen'],
+                     total_conn=p0f_info['total_conn'],
+                     uptime_min=p0f_info['uptime_min'],
+                     last_nat=p0f_info['last_nat'],
+                     last_chg=p0f_info['last_chg'],
+                     bad_sw=p0f_info['bad_sw'],
+                     os_match_q=p0f_info['os_match_q'],
+                     os_name=p0f_info['os_name'].decode("utf-8").rstrip('\x00'),
+                     os_flavor=p0f_info['os_flavor'].decode("utf-8").rstrip('\x00'),
+                     http_name=p0f_info['http_name'].decode("utf-8").rstrip('\x00'),
+                     http_flavor=p0f_info['http_flavor'].decode("utf-8").rstrip('\x00'),
+                     link_type=p0f_info['link_type'].decode("utf-8").rstrip('\x00'),
+                     language=p0f_info['language'].decode("utf-8").rstrip('\x00'),
+                     captured_data_id=captured_data_id
+                     )
+        db.session.add(row)
+
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        pass
 
 
 try:
     adminroute = '/' + Links.query.filter_by(role=1).first().route
-except:
+except Exception as e:
     print("err")
+    print(e)
     adminroute = '/' + 'admin'
 adminrouteapi_change = adminroute + 'apichange'
 adminrouteapi_delete = adminroute + 'apidelete'
@@ -30,7 +83,6 @@ adminroute_logout = adminroute + 'logout'
 adminroute_data = adminroute + 'data'
 adminrouteapi_data_delete_row = adminroute_data + 'apidelete'
 adminrouteapi_data_delete_all = adminroute_data + 'apideleteall'
-
 
 
 @appFlask.route(adminroute, methods=['GET', 'POST'])
@@ -43,7 +95,6 @@ def admin():
                 links.append({'id': row.id, 'route': row.route, 'link': row.link, 'status': 'disabled'})
             else:
                 links.append({'id': row.id, 'route': row.route, 'link': row.link})
-        print(links)
         return links
 
     form = LoginForm()
@@ -74,7 +125,6 @@ def show_data():
                          'created': row.created})
         return data
 
-
     if current_user.is_authenticated:
         return render_template('data.html', data=getData(), adminroute=adminroute, adminroute_data=adminroute_data,
                                adminroute_logout=adminroute_logout,
@@ -95,41 +145,37 @@ def index():
     url = '/'
     catch_ip(request, url)
     link = db.session.query(Links.link).filter(Links.route == '/').scalar()
+    '''
     try:
         # sudo p0f -i eth0 -s /home/support/Repo/cera/p0f.sock
         p0f_client = P0f("p0f.sock")
         p0f_info = p0f_client.get_info(request.remote_addr)
-        print(p0f_info)
+        # print(p0f_info)
         print('----------Beauty------------')
-        print('magic=' ,p0f_info['magic'])
-        print('status=' ,p0f_info['status'])
-        print('first_seen=' ,p0f_info['first_seen'])
-        print('last_seen=' ,p0f_info['last_seen'])
-        print('total_conn=' ,p0f_info['total_conn'])
-        print('uptime_min=' ,p0f_info['uptime_min'])
-        print('up_mod_days=' ,p0f_info['up_mod_days'])
-        print('last_nat=' ,p0f_info['last_nat'])
+        print('magic=', p0f_info['magic'])
+        print('status=', p0f_info['status'])
+        print('first_seen=', p0f_info['first_seen'])
+        print('last_seen=', p0f_info['last_seen'])
+        print('total_conn=', p0f_info['total_conn'])
+        print('uptime_min=', p0f_info['uptime_min'])
+        print('up_mod_days=', p0f_info['up_mod_days'])
+        print('last_nat=', p0f_info['last_nat'])
         print('last_chg=', p0f_info['last_chg'])
         print('distance=', p0f_info['distance'])
         print('bad_sw', p0f_info['bad_sw'])
         print('os_match_q=', p0f_info['os_match_q'])
-        print('os_name=', p0f_info['os_name'].decode("utf-8"))
-        print('os_flavor=', p0f_info['os_flavor'].decode("utf-8"))
-        print('http_name=', p0f_info['http_name'].decode("utf-8"))
-        print('http_flavor=', p0f_info['http_flavor'].decode("utf-8"))
-        print('link_type=', p0f_info['link_type'].decode("utf-8"))
-        print('language=', p0f_info['language'].decode("utf-8"))
+        print('os_name=', p0f_info['os_name'].decode("utf-8").rstrip('\x00'))
+        print('os_flavor=', p0f_info['os_flavor'].decode("utf-8").rstrip('\x00'))
+        print('http_name=', p0f_info['http_name'].decode("utf-8").rstrip('\x00'))
+        print('http_flavor=', p0f_info['http_flavor'].decode("utf-8").rstrip('\x00'))
+        print('link_type=', p0f_info['link_type'].decode("utf-8").rstrip('\x00'))
+        print('language=', p0f_info['language'].decode("utf-8").rstrip('\x00'))
         print('uptime=', p0f_info['uptime'])
         print('uptime_sec=', p0f_info['uptime_sec'])
-
-
-
-
-
     except Exception as e:
         print('Err p0f')
         print(e)
-
+'''
     return redirect(link, code=302)
 
 
@@ -209,6 +255,7 @@ def data_delete_row():
         except Exception as e:
             print(e)
             return "error"
+
 
 @appFlask.route(adminrouteapi_data_delete_all, methods=['POST'])
 def data_delete_allrows():

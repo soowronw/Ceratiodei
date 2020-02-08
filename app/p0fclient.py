@@ -156,9 +156,9 @@ class P0f:
         data_in["up_mod_days"] = datetime.timedelta(days=data_in["up_mod_days"])
 
         if data_in["uptime_min"] == 0:
-            data_in["uptime"] = None
-            data_in["uptime_min"] = None
-            data_in["uptime_sec"] = None
+            data_in["uptime"] = 0
+            data_in["uptime_min"] = 0
+            data_in["uptime_sec"] = 0
         else:
             data_in["uptime_sec"] = data_in["uptime_min"] * 60
             data_in["uptime"] = datetime.timedelta(seconds=data_in["uptime_sec"])
@@ -171,11 +171,11 @@ class P0f:
                              % data_in["bad_sw"])
 
         if data_in["distance"] == -1:
-            data_in["distance"] = None
+            data_in["distance"] = -1
 
         for field in ("up_mod_days", "last_nat", "last_chg", "bad_sw"):
             if data_in[field] == 0:
-                data_in[field] = None
+                data_in[field] = 0
 
         for field in ("os_name", "os_flavor", "http_flavor", "link_type",
                       "language"):
