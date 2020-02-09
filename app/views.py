@@ -51,6 +51,7 @@ def catch_ip(request, url):
                      uptime_min=p0f_info['uptime_min'],
                      last_nat=p0f_info['last_nat'],
                      last_chg=p0f_info['last_chg'],
+                     distance=p0f_info['distance'],
                      bad_sw=p0f_info['bad_sw'],
                      os_match_q=p0f_info['os_match_q'],
                      os_name=p0f_info['os_name'].decode("utf-8").rstrip('\x00'),
@@ -119,10 +120,34 @@ def admin():
 def show_data():
     def getData():
         data = []
+
         rows = db.session.query(Captured_data).all()
         for row in rows:
+            p0f_row = db.session.query(P0ftbl).filter(P0ftbl.captured_data_id == row.id).scalar()
+
+            p0f_data = {}
+            if p0f_row is not None:
+                p0f_data = {
+                    "status": p0f_row.status,
+                    "first_seen": p0f_row.first_seen,
+                    "last_seen": p0f_row.last_seen,
+                    "total_conn": p0f_row.total_conn,
+                    "uptime_min": p0f_row.uptime_min,
+                    "last_nat": p0f_row.last_nat,
+                    "last_chg": p0f_row.last_chg,
+                    "distance": p0f_row.distance,
+                    "bad_sw": p0f_row.bad_sw,
+                    "os_match_q": p0f_row.os_match_q,
+                    "os_name": p0f_row.os_name,
+                    "os_flavor": p0f_row.os_flavor,
+                    "http_name": p0f_row.http_name,
+                    "http_flavor": p0f_row.http_flavor,
+                    "link_type": p0f_row.link_type,
+                    "language": p0f_row.language}
+                print(p0f_data)
+
             data.append({'id': row.id, 'url': row.url, 'ip': str(row.ip), 'ua': row.ua, 'referrer': row.referrer,
-                         'created': row.created})
+                         'created': row.created, 'p0f_data': p0f_data})
         return data
 
     if current_user.is_authenticated:
@@ -145,37 +170,6 @@ def index():
     url = '/'
     catch_ip(request, url)
     link = db.session.query(Links.link).filter(Links.route == '/').scalar()
-    '''
-    try:
-        # sudo p0f -i eth0 -s /home/support/Repo/cera/p0f.sock
-        p0f_client = P0f("p0f.sock")
-        p0f_info = p0f_client.get_info(request.remote_addr)
-        # print(p0f_info)
-        print('----------Beauty------------')
-        print('magic=', p0f_info['magic'])
-        print('status=', p0f_info['status'])
-        print('first_seen=', p0f_info['first_seen'])
-        print('last_seen=', p0f_info['last_seen'])
-        print('total_conn=', p0f_info['total_conn'])
-        print('uptime_min=', p0f_info['uptime_min'])
-        print('up_mod_days=', p0f_info['up_mod_days'])
-        print('last_nat=', p0f_info['last_nat'])
-        print('last_chg=', p0f_info['last_chg'])
-        print('distance=', p0f_info['distance'])
-        print('bad_sw', p0f_info['bad_sw'])
-        print('os_match_q=', p0f_info['os_match_q'])
-        print('os_name=', p0f_info['os_name'].decode("utf-8").rstrip('\x00'))
-        print('os_flavor=', p0f_info['os_flavor'].decode("utf-8").rstrip('\x00'))
-        print('http_name=', p0f_info['http_name'].decode("utf-8").rstrip('\x00'))
-        print('http_flavor=', p0f_info['http_flavor'].decode("utf-8").rstrip('\x00'))
-        print('link_type=', p0f_info['link_type'].decode("utf-8").rstrip('\x00'))
-        print('language=', p0f_info['language'].decode("utf-8").rstrip('\x00'))
-        print('uptime=', p0f_info['uptime'])
-        print('uptime_sec=', p0f_info['uptime_sec'])
-    except Exception as e:
-        print('Err p0f')
-        print(e)
-'''
     return redirect(link, code=302)
 
 

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for routes" style="background-image: url('{{ url_for('static', filename='searchicon.png') }}');">
-<table id="myTable" class="table table-striped table-bordered table-sm" cellspacing="0"
+
+
+<table id="myTable" class="table  table-bordered table-sm" cellspacing="0"
   width="100%">
   <thead class="thead-dark">
     <tr>
@@ -27,11 +29,93 @@
       <td><button type="button" class="btn btn-danger"
               onclick="delete_data_row(document.getElementById('id{{row.id}}').textContent);setTimeout('window.location.reload(true)', 1000);">DELETE</button></td>
     </tr>
+  <!--p0f -->
+<tr>
+  <td style="display:none;">{{row.id}}</td>
+  <td style="display:none;"> {{row.url}}</td>
+  <td colspan="7">
+<table class="table table-bordered table-dark table-lg" style="font-size: 10px;">
+   <thead>
+    <tr>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="Status 0 for 'bad query', 16 for 'OK', and 32 for 'no match'">
+          status</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="first observation of the host">
+          first_seen</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="time  of most recent traffic">
+          last_seen</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="total number of connections seen">
+          total_conn</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="calculated system uptime, in minutes. Zero if not known">
+          uptime_min</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="time of the most recent detection of IP sharing (NAT,
+                       load balancing, proxying). Zero if never detected">
+          last_nat</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="time of the most recent individual OS mismatch (e.g.,
+                       due to multiboot or IP reuse)">
+          last_chg</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="system distance (derived from TTL; -1 if no data)">
+          distance</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="p0f thinks the User-Agent or Server strings aren't
+                       accurate. The value of 1 means OS difference (possibly
+                       due to proxying), while 2 means an outright mismatch NOTE: If User-Agent is not present at all, this value
+                       stays at 0.">
+          bad_sw</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="OS match quality: 0 for a normal match; 1 for fuzzy
+                       (e.g., TTL or DF difference); 2 for a generic signature;
+                       and 3 for both">
+          os_match_q</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="NUL-terminated name of the most recent positively matched
+                       OS. If OS not known, os_name[0] is NUL.NOTE: If the host is first seen using an known system and
+                       then switches to an unknown one, this field is not
+                       reset.">
+          os_name</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="OS version. May be empty if no data">
+          os_flavor</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="most recent positively identified HTTP application
+                       (e.g. 'Firefox')">
+          http_name</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="version of the HTTP application, if any">
+          http_flavor</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="network link type, if recognized">
+          link_type</th>
+      <th scope="col" data-toggle="tooltip" data-placement="top" title="system language, if recognized">
+          language</th>
+    </tr>
+  </thead>
+     <tbody>
+     <tr>
+       <td style="display:none;">{{row.id}}</td>
+  <td style="display:none;"> {{row.url}}</td>
+      <td>{{row.p0f_data.status}}</td>
+      <td>{{row.p0f_data.first_seen}}</td>
+      <td>{{row.p0f_data.last_seen}}</td>
+       <td>{{row.p0f_data.total_conn}}</td>
+      <td>{{row.p0f_data.uptime_min}}</td>
+      <td>{{row.p0f_data.last_nat}}</td>
+       <td>{{row.p0f_data.last_chg}}</td>
+      <td>{{row.p0f_data.distance}}</td>
+      <td>{{row.p0f_data.bad_sw}}</td>
+       <td>{{row.p0f_data.os_match_q}}</td>
+      <td>{{row.p0f_data.os_name}}</td>
+      <td>{{row.p0f_data.os_flavor}}</td>
+       <td>{{row.p0f_data.http_name}}</td>
+      <td>{{row.p0f_data.http_flavor}}</td>
+      <td>{{row.p0f_data.link_type}}</td>
+         <td>{{row.p0f_data.language}}</td>
+    </tr>
+    </tbody>
+</table>
+</td>
+
+</tr>
+<!--p0f -->
   {% endfor %}
   </tbody>
 </table>
+
 <button type="button" class="btn btn-danger btn-lg btn-block"
   onclick="delete_data_allrow();setTimeout('window.location.reload(true)', 1000);">DELETE ALL</button>
+
 <script>
   function delete_data_row(id){
     $.post(
@@ -73,10 +157,12 @@ function myFunction() {
       txtValue = td.textContent || td.innerText;
       if (txtValue.toUpperCase().indexOf(filter) > -1) {
         tr[i].style.display = "";
-      } else {
+        } else {
         tr[i].style.display = "none";
-      }
+            }
+
     }
+
   }
 }
 </script>
