@@ -27,7 +27,9 @@
       <td >{{row.referrer}}</td>
       <td><script>document.write(moment.utc("{{row.created}}").local().format('YYYY-MM-DD HH:mm:ss'));</script></td>
       <td><button type="button" class="btn btn-danger"
-              onclick="delete_data_row(document.getElementById('id{{row.id}}').textContent);setTimeout('window.location.reload(true)', 1000);">DELETE</button></td>
+              onclick="delete_data_row(document.getElementById('id{{row.id}}').textContent);setTimeout('window.location.reload(true)', 1000);">DELETE</button>
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">RAW HEADERS</button>
+        </td>
     </tr>
   <!--p0f -->
 <tr>
@@ -48,31 +50,31 @@
       <th scope="col" data-toggle="tooltip" data-placement="top" title="calculated system uptime, in minutes. Zero if not known">
           uptime_min</th>
       <th scope="col" data-toggle="tooltip" data-placement="top" title="time of the most recent detection of IP sharing (NAT,
-                       load balancing, proxying). Zero if never detected">
+load balancing, proxying). Zero if never detected">
           last_nat</th>
       <th scope="col" data-toggle="tooltip" data-placement="top" title="time of the most recent individual OS mismatch (e.g.,
-                       due to multiboot or IP reuse)">
+due to multiboot or IP reuse)">
           last_chg</th>
       <th scope="col" data-toggle="tooltip" data-placement="top" title="system distance (derived from TTL; -1 if no data)">
           distance</th>
       <th scope="col" data-toggle="tooltip" data-placement="top" title="p0f thinks the User-Agent or Server strings aren't
-                       accurate. The value of 1 means OS difference (possibly
-                       due to proxying), while 2 means an outright mismatch NOTE: If User-Agent is not present at all, this value
-                       stays at 0.">
+accurate. The value of 1 means OS difference (possibly
+due to proxying), while 2 means an outright mismatch NOTE: If User-Agent is not present at all, this value
+stays at 0.">
           bad_sw</th>
       <th scope="col" data-toggle="tooltip" data-placement="top" title="OS match quality: 0 for a normal match; 1 for fuzzy
-                       (e.g., TTL or DF difference); 2 for a generic signature;
-                       and 3 for both">
+(e.g., TTL or DF difference); 2 for a generic signature;
+and 3 for both">
           os_match_q</th>
       <th scope="col" data-toggle="tooltip" data-placement="top" title="NUL-terminated name of the most recent positively matched
-                       OS. If OS not known, os_name[0] is NUL.NOTE: If the host is first seen using an known system and
-                       then switches to an unknown one, this field is not
-                       reset.">
+OS. If OS not known, os_name[0] is NUL.NOTE: If the host is first seen using an known system and
+then switches to an unknown one, this field is not
+reset.">
           os_name</th>
       <th scope="col" data-toggle="tooltip" data-placement="top" title="OS version. May be empty if no data">
           os_flavor</th>
       <th scope="col" data-toggle="tooltip" data-placement="top" title="most recent positively identified HTTP application
-                       (e.g. 'Firefox')">
+ (e.g. 'Firefox')">
           http_name</th>
       <th scope="col" data-toggle="tooltip" data-placement="top" title="version of the HTTP application, if any">
           http_flavor</th>
@@ -116,6 +118,26 @@
 <button type="button" class="btn btn-danger btn-lg btn-block"
   onclick="delete_data_allrow();setTimeout('window.location.reload(true)', 1000);">DELETE ALL</button>
 
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">RAW HEADERS</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+      </div>
+    </div>
+  </div>
+</div>
 <script>
   function delete_data_row(id){
     $.post(
