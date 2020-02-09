@@ -28,7 +28,10 @@
       <td><script>document.write(moment.utc("{{row.created}}").local().format('YYYY-MM-DD HH:mm:ss'));</script></td>
       <td><button type="button" class="btn btn-danger"
               onclick="delete_data_row(document.getElementById('id{{row.id}}').textContent);setTimeout('window.location.reload(true)', 1000);">DELETE</button>
-        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">RAW HEADERS</button>
+        <button type="button" class="btn btn-info" onclick="
+        showmodal(document.getElementById('rh{{row.id}}').textContent );
+">RAW HEADERS</button>
+          <div id="rh{{row.id}}" style="display:none;">{{row.rawhead}}</div>
         </td>
     </tr>
   <!--p0f -->
@@ -128,7 +131,7 @@ reset.">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
+      <div id ="divrawhead" class="modal-body" style="word-wrap: break-word;">
         ...
       </div>
       <div class="modal-footer">
@@ -182,10 +185,27 @@ function myFunction() {
         } else {
         tr[i].style.display = "none";
             }
-
     }
 
   }
 }
+</script>
+<script>
+    function showmodal(rawhead){
+    document.getElementById("divrawhead").textContent = rawhead;
+    $('#exampleModal').modal('show');
+    }
+
+
+    function slashEscape(contents) {
+    return contents
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n');
+}
+
+
+
+
 </script>
 {% endblock %}

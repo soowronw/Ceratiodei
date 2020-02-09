@@ -5,6 +5,7 @@ from flask import redirect, request, render_template, url_for
 from app.models import Captured_data, Links, User, P0ftbl
 from app.forms import LoginForm
 from app.p0fclient import P0f
+import re
 
 
 def catch_ip(request, url):
@@ -120,11 +121,9 @@ def admin():
 def show_data():
     def getData():
         data = []
-
         rows = db.session.query(Captured_data).all()
         for row in rows:
             p0f_row = db.session.query(P0ftbl).filter(P0ftbl.captured_data_id == row.id).scalar()
-
             p0f_data = {}
             if p0f_row is not None:
                 p0f_data = {
@@ -144,10 +143,12 @@ def show_data():
                     "http_flavor": p0f_row.http_flavor,
                     "link_type": p0f_row.link_type,
                     "language": p0f_row.language}
-                print(p0f_data)
-
+# FUCK THIS SHIT
+            #print(row.rawheaders)
+            newrowheader = re.sub(r"[\n\s]*", "", row.rawheaders)
+            #print(newrowheader)
             data.append({'id': row.id, 'url': row.url, 'ip': str(row.ip), 'ua': row.ua, 'referrer': row.referrer,
-                         'created': row.created, 'p0f_data': p0f_data})
+                         'created': row.created, 'rawhead': row.rawheaders, 'p0f_data': p0f_data})
         return data
 
     if current_user.is_authenticated:
