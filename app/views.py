@@ -5,7 +5,6 @@ from flask import redirect, request, render_template, url_for
 from app.models import Captured_data, Links, User, P0ftbl
 from app.forms import LoginForm
 from app.p0fclient import P0f
-import re
 
 
 def catch_ip(request, url):
@@ -21,29 +20,9 @@ def catch_ip(request, url):
     captured_data_id = row.id
     print(row.id)
     try:
-        p0f_client = P0f("p0f.sock")
+        #p0f_client = P0f("p0f.sock")
+        p0f_client = P0f(appFlask.config['P0FSOCK'])
         p0f_info = p0f_client.get_info(request.remote_addr)
-        print('----------Beauty------------')
-        print('magic=', p0f_info['magic'])
-        print('status=', p0f_info['status'])
-        print('first_seen=', p0f_info['first_seen'])
-        print('last_seen=', p0f_info['last_seen'])
-        print('total_conn=', p0f_info['total_conn'])
-        print('uptime_min=', p0f_info['uptime_min'])
-        print('up_mod_days=', p0f_info['up_mod_days'])
-        print('last_nat=', p0f_info['last_nat'])
-        print('last_chg=', p0f_info['last_chg'])
-        print('distance=', p0f_info['distance'])
-        print('bad_sw', p0f_info['bad_sw'])
-        print('os_match_q=', p0f_info['os_match_q'])
-        print('os_name=', p0f_info['os_name'].decode("utf-8").rstrip('\x00'))
-        print('os_flavor=', p0f_info['os_flavor'].decode("utf-8").rstrip('\x00'))
-        print('http_name=', p0f_info['http_name'].decode("utf-8").rstrip('\x00'))
-        print('http_flavor=', p0f_info['http_flavor'].decode("utf-8").rstrip('\x00'))
-        print('link_type=', p0f_info['link_type'].decode("utf-8").rstrip('\x00'))
-        print('language=', p0f_info['language'].decode("utf-8").rstrip('\x00'))
-        print('uptime=', p0f_info['uptime'])
-        print('uptime_sec=', p0f_info['uptime_sec'])
         row = P0ftbl(magic=p0f_info['magic'],
                      status=p0f_info['status'],
                      first_seen=p0f_info['first_seen'],
@@ -123,6 +102,7 @@ def show_data():
         data = []
         rows = db.session.query(Captured_data).all()
         for row in rows:
+            # sudo p0f -i eth0 -s /home/support/Repo/cera/p0f.sock
             p0f_row = db.session.query(P0ftbl).filter(P0ftbl.captured_data_id == row.id).scalar()
             p0f_data = {}
             if p0f_row is not None:
@@ -143,10 +123,6 @@ def show_data():
                     "http_flavor": p0f_row.http_flavor,
                     "link_type": p0f_row.link_type,
                     "language": p0f_row.language}
-# FUCK THIS SHIT
-            #print(row.rawheaders)
-            newrowheader = re.sub(r"[\n\s]*", "", row.rawheaders)
-            #print(newrowheader)
             data.append({'id': row.id, 'url': row.url, 'ip': str(row.ip), 'ua': row.ua, 'referrer': row.referrer,
                          'created': row.created, 'rawhead': row.rawheaders, 'p0f_data': p0f_data})
         return data
@@ -205,8 +181,6 @@ def change():
 def delete():
     if current_user.is_authenticated:
         id = request.form.get("id")
-
-        print(id)
         try:
             row = db.session.query(Links).filter(Links.id == id).scalar()
             if row.route == '/':
@@ -245,6 +219,7 @@ def data_delete_row():
         id = request.form.get("id")
         try:
             db.session.query(Captured_data).filter(Captured_data.id == id).delete()
+            db.session.query(P0ftbl).filter(P0ftbl.captured_data_id == id).delete()
             db.session.commit()
             return "ok"
         except Exception as e:
@@ -257,6 +232,7 @@ def data_delete_allrows():
     if current_user.is_authenticated:
         try:
             db.session.query(Captured_data).delete()
+            db.session.query(P0ftbl).delete()
             db.session.commit()
             return "ok"
         except Exception as e:
